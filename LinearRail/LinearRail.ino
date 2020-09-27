@@ -8,9 +8,9 @@
 #define FULL  4
 
 // globals and flags
-int f_delay  = 2000, //5000,  // full step delay in micros
+int f_delay  = 2000,  // full step delay in micros
     h_delay  = 1000,  // half step delay in micros
-    steptype = FULL;  // change between HALF and FULL
+    steptype = HALF;  // change between HALF and FULL
                       //   to modify step type
 
 void setup() {
