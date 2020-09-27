@@ -8,8 +8,8 @@
 #define FULL  4
 
 // globals and flags
-int f_delay  = 5000,  // full step delay in micros
-    h_delay  = 3000,  // half step delay in micros
+int f_delay  = 2000, //5000,  // full step delay in micros
+    h_delay  = 1000,  // half step delay in micros
     steptype = FULL;  // change between HALF and FULL
                       //   to modify step type
 
@@ -40,22 +40,22 @@ void loop() {
   // later data readouts
   Serial.println(steptype==FULL?"Full":"Half");
 
-  if(steptype==FULL) {
+  if (steptype==FULL) {
     // 50 steps per 1 revolution
     for (step=0;step<=stepmax;step++) {  
-      towards(step,t0);
+      away(step,t0);
     }
     for (step=0;step<=stepmax;step++) {
-      away(step,t0);
+      towards(step,t0);
     }
   }
   
-  if(steptype==HALF) {
+  if (steptype==HALF) {
     for (step=0;step<=stepmax;step++) {  
-      towardsHalf(step,t0);
+      awayHalf(step,t0);
     }
     for (step=0;step<=stepmax;step++) {
-      awayHalf(step,t0);
+      towardsHalf(step,t0);
     }
   }
   
@@ -63,8 +63,8 @@ void loop() {
   while(1);   // hold until reset
 }
 
-// away from stepper
-void away(int s, double t0) {
+// towards stepper
+void towards(int s, double t0) {
   int ss = 0; // substep counter 
   coilA(NORTH);
   coilB(OFF);
@@ -82,7 +82,62 @@ void away(int s, double t0) {
   coilB(SOUTH);
   ss = readout(t0,s,ss);
   delayMicroseconds(f_delay);
+  if(ss!=4){Serial.println("Full stepcount issue"); shutdown(); while(1);}
+}
+
+void towardsHalf(int s, double t0) {
+  int ss = 0;
+  coilA(OFF);
+  coilB(SOUTH);
+  ss = readout(t0,s,ss);
+  delayMicroseconds(h_delay);
   coilA(NORTH);
+  coilB(SOUTH);
+  ss = readout(t0,s,ss);
+  delayMicroseconds(h_delay);
+  coilA(NORTH);
+  coilB(OFF);
+  ss = readout(t0,s,ss);
+  delayMicroseconds(h_delay);
+  coilA(NORTH);
+  coilB(NORTH);
+  ss = readout(t0,s,ss);
+  delayMicroseconds(h_delay);
+  coilA(OFF);
+  coilB(NORTH);
+  ss = readout(t0,s,ss);
+  delayMicroseconds(h_delay);
+  coilA(SOUTH);
+  coilB(NORTH);
+  ss = readout(t0,s,ss);
+  delayMicroseconds(h_delay);
+  coilA(SOUTH);
+  coilB(OFF);
+  ss = readout(t0,s,ss);
+  delayMicroseconds(h_delay);
+  coilA(SOUTH);
+  coilB(SOUTH);
+  ss = readout(t0,s,ss);
+  delayMicroseconds(h_delay);
+  if(ss!=8){Serial.println("Half stepcount issue"); shutdown(); while(1);}
+}
+
+// away from stepper
+void away(int s, double t0) {
+  int ss = 0;
+  coilA(OFF);
+  coilB(NORTH);
+  ss = readout(t0,s,ss);
+  delayMicroseconds(f_delay);
+  coilA(NORTH);
+  coilB(OFF);
+  ss = readout(t0,s,ss);
+  delayMicroseconds(f_delay);
+  coilA(OFF);
+  coilB(SOUTH);
+  ss = readout(t0,s,ss);
+  delayMicroseconds(f_delay);
+  coilA(SOUTH);
   coilB(OFF);
   ss = readout(t0,s,ss);
   delayMicroseconds(f_delay);
@@ -120,69 +175,6 @@ void awayHalf(int s, double t0) {
   ss = readout(t0,s,ss);
   delayMicroseconds(h_delay);
   coilA(NORTH);
-  coilB(SOUTH);
-  ss = readout(t0,s,ss);
-  delayMicroseconds(h_delay);
-  if(ss!=8){Serial.println("Half stepcount issue"); shutdown(); while(1);}
-}
-
-// towards stepper
-void towards(int s, double t0) {
-  int ss = 0;
-  coilA(OFF);
-  coilB(NORTH);
-  ss = readout(t0,s,ss);
-  delayMicroseconds(f_delay);
-  coilA(NORTH);
-  coilB(OFF);
-  ss = readout(t0,s,ss);
-  delayMicroseconds(f_delay);
-  coilA(OFF);
-  coilB(SOUTH);
-  ss = readout(t0,s,ss);
-  delayMicroseconds(f_delay);
-  coilA(SOUTH);
-  coilB(OFF);
-  ss = readout(t0,s,ss);
-  delayMicroseconds(f_delay);
-  coilA(OFF);
-  coilB(NORTH);
-  ss = readout(t0,s,ss);
-  delayMicroseconds(f_delay);
-  if(ss!=4){Serial.println("Full stepcount issue"); shutdown(); while(1);}
-}
-
-void towardsHalf(int s, double t0) {
-  int ss = 0;
-  coilA(OFF);
-  coilB(SOUTH);
-  ss = readout(t0,s,ss);
-  delayMicroseconds(h_delay);
-  coilA(NORTH);
-  coilB(SOUTH);
-  ss = readout(t0,s,ss);
-  delayMicroseconds(h_delay);
-  coilA(NORTH);
-  coilB(OFF);
-  ss = readout(t0,s,ss);
-  delayMicroseconds(h_delay);
-  coilA(NORTH);
-  coilB(NORTH);
-  ss = readout(t0,s,ss);
-  delayMicroseconds(h_delay);
-  coilA(OFF);
-  coilB(NORTH);
-  ss = readout(t0,s,ss);
-  delayMicroseconds(h_delay);
-  coilA(SOUTH);
-  coilB(NORTH);
-  ss = readout(t0,s,ss);
-  delayMicroseconds(h_delay);
-  coilA(SOUTH);
-  coilB(OFF);
-  ss = readout(t0,s,ss);
-  delayMicroseconds(h_delay);
-  coilA(SOUTH);
   coilB(SOUTH);
   ss = readout(t0,s,ss);
   delayMicroseconds(h_delay);
@@ -238,7 +230,8 @@ int readout(double t0, int s, int ss) {
     +"\t"
     +String(i_B)
   );
-  return ss++;
+  ss+=1;
+  return ss;
 }
 
 // turn all off
