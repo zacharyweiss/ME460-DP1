@@ -10,7 +10,7 @@
 // globals and flags
 int f_delay  = 2000,  // full step delay in micros
     h_delay  = 1000,  // half step delay in micros
-    steptype = HALF;  // change between HALF and FULL
+    steptype = FULL;  // change between HALF and FULL
                       //   to modify step type
 
 void setup() {
@@ -24,16 +24,26 @@ void setup() {
   pinMode(11,OUTPUT);
   pinMode(8,OUTPUT);
 
+  // limit switch
+  pinMode(10,INPUT_PULLUP);
+
   shutdown();
 
   Serial.begin(115200);
+
+  // wait for user input to begin
+  while(digitalRead(10));
+  // allow time for button to be released, else will skip
+  // first step of movement sequence that waits for
+  // the limit switch to trigger
+  delay(200);
 }
 
 void loop() {
   // init step and time counters,
   // define max distance in steps
-  int step,
-      stepmax = 300;
+  int step = 0,
+      stepmax = 1200;
   double t0 = micros();
   
   // print which regime we're operating in, to contextualize
@@ -42,20 +52,21 @@ void loop() {
 
   if (steptype==FULL) {
     // 50 steps per 1 revolution
+    // while switch is unpressed and count is below safety margin
+    while(digitalRead(10) && step<1.2*stepmax){
+      towards(step,t0);
+    }
     for (step=0;step<=stepmax;step++) {  
       away(step,t0);
-    }
-    for (step=0;step<=stepmax;step++) {
-      towards(step,t0);
     }
   }
   
   if (steptype==HALF) {
+    while(digitalRead(10) && step<1.2*stepmax){
+      towardsHalf(step,t0);
+    }
     for (step=0;step<=stepmax;step++) {  
       awayHalf(step,t0);
-    }
-    for (step=0;step<=stepmax;step++) {
-      towardsHalf(step,t0);
     }
   }
   
