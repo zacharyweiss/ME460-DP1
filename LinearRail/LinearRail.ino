@@ -1,6 +1,6 @@
 /* Zachary Weiss
 ** 26 Sept 2020
-** Linear Rail Full&Half Step for ME460 */
+** Linear Rail Full & Half Step for ME460 */
 #define OFF   0
 #define NORTH 1
 #define SOUTH 2
@@ -55,6 +55,7 @@ void loop() {
     // while switch is unpressed and count is below safety margin
     while(digitalRead(10) && step<1.2*stepmax){
       towards(step,t0);
+      step++;
     }
     for (step=0;step<=stepmax;step++) {  
       away(step,t0);
@@ -64,6 +65,7 @@ void loop() {
   if (steptype==HALF) {
     while(digitalRead(10) && step<1.2*stepmax){
       towardsHalf(step,t0);
+      step++;
     }
     for (step=0;step<=stepmax;step++) {  
       awayHalf(step,t0);
@@ -241,6 +243,7 @@ int readout(double t0, int s, int ss) {
     +"\t"
     +String(i_B)
   );
+  // increment substep
   ss+=1;
   return ss;
 }
